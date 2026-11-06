@@ -1,43 +1,28 @@
-
-name: Auto Renew Tickhosting
+name: TickHosting Verification Check
 
 on:
+  schedule:
+    - cron: '0 */4 * * *'
   workflow_dispatch:
-    inputs:
-      login_test_only:
-        description: "Test login without renewing"
-        required: true
-        type: boolean
-        default: true
 
 permissions:
   contents: read
 
 jobs:
-  auto_renew_tickhosting:
-    runs-on: windows-latest
-
+  check_tickhosting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-
+          python-version: '3.12'
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-
-      - name: Run TickHosting script
+        run: python -m pip install -r requirements.txt
+      - name: Check TickHosting session and page
         env:
-          EMAIL: ${{ secrets.EMAIL }}
-          PASSWORD: ${{ secrets.PASSWORD }}
           PTERODACTYL_SESSION: ${{ secrets.PTERODACTYL_SESSION }}
-          TEST_LOGIN_ONLY: ${{ inputs.login_test_only }}
+          CHECK_WAIT_SECONDS: '35'
         run: python auto_renew.py
