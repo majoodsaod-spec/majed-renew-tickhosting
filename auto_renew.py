@@ -341,7 +341,11 @@ def main():
         # try login to dashboard
         if not login_to_dashboard(driver):
             raise Exception("Unable to login to dashboard")
-        
+        if os.getenv("TEST_LOGIN_ONLY", "false").lower() == "true":
+            print("LOGIN TEST PASSED")
+            print("Stopping before server selection or renewal.")
+        return
+    
         print("Refreshing page after login...")
         driver.refresh()
         time.sleep(5)  # Give more time for the page to load
