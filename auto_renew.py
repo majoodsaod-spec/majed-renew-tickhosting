@@ -34,28 +34,22 @@ def setup_driver():
     return webdriver.Chrome(options=options)
 
 def add_cookies(driver):
-    print("Current cookies before adding:", driver.get_cookies())
     driver.delete_all_cookies()
-    cookies = [
-        {
-            'name': 'PTERODACTYL_SESSION',
-            'value': os.environ['PTERODACTYL_SESSION'],
-            'domain': '.tickhosting.com'
-        },
-        {
-            'name': 'pterodactyl_session',
-            'value': os.environ['PTERODACTYL_SESSION'],
-            'domain': '.tickhosting.com'
-        }
-    ]
-    for cookie in cookies:
-        try:
-            driver.add_cookie(cookie)
-            print(f"Added cookie: {cookie['name']}")
-        except Exception as e:
-            print(f"Error adding cookie {cookie['name']}: {str(e)}")
-    
-    print("Current cookies after adding:", driver.get_cookies())
+
+    cookie_value = os.getenv('PTERODACTYL_SESSION', '')
+
+    if not cookie_value:
+        raise ValueError("PTERODACTYL_SESSION secret is missing")
+
+    cookie = {
+        'name': 'pterodactyl_panel_session',
+        'value': cookie_value,
+        'domain': 'tickhosting.com',
+        'path': '/'
+    }
+
+    driver.add_cookie(cookie)
+    print("TickHosting session cookie added.")
 
 def login_to_dashboard(driver):
     # try cookie login frist
